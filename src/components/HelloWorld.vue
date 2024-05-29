@@ -1,7 +1,9 @@
 <template>
   <div class="greetings">
-    <button @click="redirectToStrava">Connect with Strava</button>
-    <button @click="getStravaData">Get Strava routes</button>
+    <div id="controllButtons">
+      <button @click="redirectToStrava">Connect with Strava</button>
+      <button @click="getStravaData">Get Strava routes</button>
+    </div>
     <div id="map" class="map"></div>
   </div>
 </template>
@@ -138,7 +140,21 @@ const getStravaData = () => {
 
 <style scoped>
 #map {
-  width: 1500px;
-  height: 800px;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+}
+
+button {
+  padding: 0.5rem;
+  font-size: 1.3rem;
+  border-radius: 50;
+}
+
+#controllButtons {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
 }
 </style>
