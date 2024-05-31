@@ -4,6 +4,23 @@
       <button @click="redirectToStrava">Connect with Strava</button>
       <button @click="getStravaData">Get Strava routes</button>
     </div>
+    <div id="activity_list">
+      <ul>
+        <li v-for="act in activities" v-bind:key="act.id">
+          <p>
+            {{ act.name }}
+            {{
+              new Date(act.start_date).getDate() +
+              "." +
+              new Date(act.start_date).getMonth() +
+              "." +
+              new Date(act.start_date).getFullYear()
+            }}
+          </p>
+          <p>{{ Math.round(act.distance / 10) / 100 + "km" }} {{ act.type }}</p>
+        </li>
+      </ul>
+    </div>
     <div id="map" class="map"></div>
   </div>
 </template>
@@ -19,6 +36,8 @@ import { Feature } from "ol";
 import { LineString } from "ol/geom";
 import { Style, Stroke } from "ol/style";
 import { fromLonLat } from "ol/proj";
+
+const activities = ref(0);
 
 // Function to decode a polyline
 function decodePolyline(encoded) {
@@ -109,6 +128,7 @@ const redirectToStrava = () => {
 
   window.location.href = authUrl;
 };
+
 const getStravaData = () => {
   let token = localStorage.getItem("accessToken");
   let config = {
@@ -122,14 +142,14 @@ const getStravaData = () => {
       config
     )
     .then((resp) => {
-      let activities = resp.data;
+      activities.value = resp.data;
       console.log(resp);
       // const exp_route = `https://www.strava.com/api/v3/routes/${athlete[0].id}/export_gpx`;
       // axios.get(exp_route, config).then((resp) => {
       //   console.log(resp);
       //   let route = resp;
       // });
-      for (let activity of activities) {
+      for (let activity of activities.value) {
         let encoded_polyline = activity.map["summary_polyline"];
         console.log(encoded_polyline);
         addPolyline(decodePolyline(encoded_polyline));
@@ -152,9 +172,16 @@ button {
 }
 
 #controllButtons {
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   z-index: 1;
+}
+
+#activity_list {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+  background-color: black;
 }
 </style>
