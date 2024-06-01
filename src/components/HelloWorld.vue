@@ -139,12 +139,14 @@ const editPolyline = (act_id) => {
 
   vectorLayer.getSource().forEachFeature((feature) => {
     if (act_id == feature.getId()) {
+      centerMapAroundFeature(map, feature);
       feature.setStyle(
         new Style({
           stroke: new Stroke({
-            color: "#0000ff",
-            width: 6,
+            color: "#008000",
+            width: 4,
           }),
+          zIndex: 10,
         })
       );
     } else {
@@ -201,6 +203,17 @@ const getStravaData = () => {
       }
     });
 };
+
+// Function to center the map around a feature
+function centerMapAroundFeature(map, feature) {
+  const geometry = feature.getGeometry();
+  const extent = geometry.getExtent();
+  map.getView().fit(extent, {
+    size: map.getSize(),
+    padding: [100, 100, 100, 100],
+    maxZoom: 15, // Optional: limit maximum zoom level
+  });
+}
 </script>
 
 <style scoped>
@@ -214,6 +227,8 @@ button {
   padding: 0.5rem;
   font-size: 1.3rem;
   border-radius: 50;
+  background-color: black;
+  color: white;
 }
 
 ul {
