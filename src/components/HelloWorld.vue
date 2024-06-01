@@ -6,13 +6,22 @@
     </div>
     <div id="activity_list">
       <ul>
-        <li v-for="act in activities" v-bind:key="act.id">
+        <li
+          v-for="act in activities"
+          v-bind:key="act.id"
+          v-on:click="editPolyline(act.id)"
+          v-bind:class="
+            act.id == active_activity
+              ? 'active_activity'
+              : 'activity_not_active'
+          "
+        >
           <p>
             {{ act.name }}
             {{
               new Date(act.start_date).getDate() +
               "." +
-              new Date(act.start_date).getMonth() +
+              (new Date(act.start_date).getMonth() + 1) +
               "." +
               new Date(act.start_date).getFullYear()
             }}
@@ -38,7 +47,15 @@ import { Style, Stroke } from "ol/style";
 import { fromLonLat } from "ol/proj";
 
 const activities = ref(0);
+const active_activity = ref(0);
 
+function set_active_activity(act_id) {
+  console.log(act_id);
+  let result =
+    act_id == active_activity ? "active_activity" : "activity_not_active";
+
+  return result;
+}
 // Function to decode a polyline
 function decodePolyline(encoded) {
   let points = [];
@@ -100,11 +117,11 @@ onMounted(() => {
   map.addLayer(vectorLayer);
 });
 
-const addPolyline = (decodedPoints) => {
+const addPolyline = (id, decodedPoints) => {
   const feature = new Feature({
     geometry: new LineString(decodedPoints),
   });
-
+  feature.setId(id);
   feature.setStyle(
     new Style({
       stroke: new Stroke({
@@ -113,8 +130,36 @@ const addPolyline = (decodedPoints) => {
       }),
     })
   );
+
   vectorLayer.getSource().addFeature(feature);
 };
+
+const editPolyline = (act_id) => {
+  active_activity.value = act_id;
+
+  vectorLayer.getSource().forEachFeature((feature) => {
+    if (act_id == feature.getId()) {
+      feature.setStyle(
+        new Style({
+          stroke: new Stroke({
+            color: "#0000ff",
+            width: 6,
+          }),
+        })
+      );
+    } else {
+      feature.setStyle(
+        new Style({
+          stroke: new Stroke({
+            color: "#ff0000",
+            width: 2,
+          }),
+        })
+      );
+    }
+  });
+};
+
 import axios from "axios";
 
 const redirectToStrava = () => {
@@ -151,8 +196,8 @@ const getStravaData = () => {
       // });
       for (let activity of activities.value) {
         let encoded_polyline = activity.map["summary_polyline"];
-        console.log(encoded_polyline);
-        addPolyline(decodePolyline(encoded_polyline));
+        // console.log(encoded_polyline);
+        addPolyline(activity.id, decodePolyline(encoded_polyline));
       }
     });
 };
@@ -171,6 +216,15 @@ button {
   border-radius: 50;
 }
 
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding-left: 15px;
+}
+
 #controllButtons {
   position: fixed;
   left: 0;
@@ -183,5 +237,14 @@ button {
   right: 0;
   z-index: 1;
   background-color: black;
+}
+
+.active_activity {
+  color: white;
+  background-color: green;
+}
+
+.activity_not_active {
+  color: white;
 }
 </style>
