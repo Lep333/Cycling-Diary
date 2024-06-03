@@ -115,6 +115,23 @@ onMounted(() => {
   });
 
   map.addLayer(vectorLayer);
+
+  // Add an event listener for click events on the map
+  map.on("click", function (evt) {
+    // Get the features at the clicked location
+    const features = map.getFeaturesAtPixel(evt.pixel);
+
+    // Check if any features were clicked
+    if (features.length > 0) {
+      // Loop through all the features
+      features.forEach(function (feature) {
+        // Check if the feature is the polyline
+        if (feature.getGeometry() instanceof LineString) {
+          editPolyline(feature.getId());
+        }
+      });
+    }
+  });
 });
 
 const addPolyline = (id, decodedPoints) => {
